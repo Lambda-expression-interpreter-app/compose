@@ -36,7 +36,9 @@ services:
     auth:
         image: "radubreazu/idp:authentication"
         networks:
-            - idp_network 
+            - idp_network
+        ports:
+            - "5001:5001"
         stdin_open: true
         tty: true
     

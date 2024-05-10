@@ -4,9 +4,6 @@ services:
         image: "mongo:latest"
         ports:
             - "27017:27017"
-        networks:
-            - idp_network
-            - db_network
         volumes:
             - mongo_data:/data/db
     
@@ -16,9 +13,6 @@ services:
             - mongodb
         ports:
             - "6000:6000"
-        networks:
-            - idp_network
-            - db_network
         environment:
             MONGO_URI: mongodb://mongodb:27017/Users
         stdin_open: false
@@ -28,8 +22,6 @@ services:
         image: mongo-express
         ports:
             - "8081:8081"
-        networks:
-            - idp_network
         environment:
             ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
     
@@ -44,17 +36,8 @@ services:
         image: "radubreazu/idp:interpreter"
         ports:
             - "8001:8001"
-        networks:
-            - idp_network
-            - db_network
         stdin_open: false
         tty: false
-
-networks:
-    idp_network:
-        driver: bridge
-    db_network:
-        driver: bridge
 
 volumes:
     mongo_data:
