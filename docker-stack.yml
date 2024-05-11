@@ -20,6 +20,8 @@ services:
     
     dbms:
         image: mongo-express
+        depends_on:
+            - mongodb
         ports:
             - "8081:8081"
         environment:
@@ -27,6 +29,9 @@ services:
     
     auth:
         image: "radubreazu/idp:authentication"
+        depends_on:
+            - script
+            - interpreter
         networks:
             - idp_network 
         stdin_open: true
@@ -34,11 +39,33 @@ services:
     
     interpreter:
         image: "radubreazu/idp:interpreter"
+        depends_on:
+            - mongodb
         ports:
             - "8001:8001"
         stdin_open: false
         tty: false
 
+    kong:
+        image: kong:latest
+        volumes:
+            - ../kong:/usr/local/kong/declarative # injectarea fișierului de configurare la calea specificată
+        environment:
+            KONG_DATABASE: 'off' # obligatoriu, dacă se vrea modul DB-less
+            KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml # trebuie specificat unde anume se va găsi fișierul de configurare
+            KONG_PROXY_ACCESS_LOG: /dev/stdout
+            KONG_ADMIN_ACCESS_LOG: /dev/stdout
+            KONG_PROXY_ERROR_LOG: /dev/stderr
+            KONG_ADMIN_ERROR_LOG: /dev/stderr
+            KONG_ADMIN_LISTEN: 0.0.0.0:8005, 0.0.0.0:8448 ssl
+        ports:
+            - "80:8000"  # Kong proxy port
+            - "443:8443"  # Kong proxy SSL port
+            - "8005:8005"  # Kong admin port
+            - "8448:8448"  # Kong admin SSL port
+
 volumes:
     mongo_data:
+        external: true
+    ../kong:
         external: true
