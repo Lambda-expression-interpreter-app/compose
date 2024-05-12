@@ -6,6 +6,8 @@ services:
             - "27017:27017"
         volumes:
             - mongo_data:/data/db
+        deploy:
+            replicas: 1     
     
     script:
         image: "radubreazu/idp:script"
@@ -16,7 +18,9 @@ services:
         environment:
             MONGO_URI: mongodb://mongodb:27017/Users
         stdin_open: false
-        tty: false    
+        tty: false
+        deploy:
+            replicas: 1   
     
     dbms:
         image: mongo-express
@@ -26,16 +30,20 @@ services:
             - "8081:8081"
         environment:
             ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017
+        deploy:
+            replicas: 1
     
     auth:
         image: "radubreazu/idp:authentication"
+        ports:
+            - "5001:5001"
         depends_on:
             - script
             - interpreter
-        networks:
-            - idp_network 
         stdin_open: true
         tty: true
+        deploy:
+            replicas: 1
     
     interpreter:
         image: "radubreazu/idp:interpreter"
@@ -45,11 +53,11 @@ services:
             - "8001:8001"
         stdin_open: false
         tty: false
+        deploy:
+            replicas: 1
 
     kong:
-        image: kong:latest
-        volumes:
-            - ../kong:/usr/local/kong/declarative # injectarea fișierului de configurare la calea specificată
+        image: "radubreazu/idp:kong"
         environment:
             KONG_DATABASE: 'off' # obligatoriu, dacă se vrea modul DB-less
             KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml # trebuie specificat unde anume se va găsi fișierul de configurare
@@ -66,6 +74,4 @@ services:
 
 volumes:
     mongo_data:
-        external: true
-    ../kong:
         external: true
