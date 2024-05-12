@@ -47,7 +47,9 @@ services:
         tty: true
     
     interpreter:
-        image: "radubreazu/idp:interpreter"
+        build:
+            context: ../interpreter
+            dockerfile: Dockerfile
         depends_on:
             - mongodb
         ports:
@@ -58,9 +60,7 @@ services:
         tty: false
 
     kong:
-        image: kong:latest
-        volumes:
-            - ../kong:/usr/local/kong/declarative # injectarea fișierului de configurare la calea specificată
+        image: radubreazu/idp:kong
         environment:
             KONG_DATABASE: 'off' # obligatoriu, dacă se vrea modul DB-less
             KONG_DECLARATIVE_CONFIG: /usr/local/kong/declarative/kong.yml # trebuie specificat unde anume se va găsi fișierul de configurare
